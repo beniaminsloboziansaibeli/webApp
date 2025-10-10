@@ -1,0 +1,19 @@
+{
+  "appTitle": "Planner Zilnic",
+  "greeting": "Bună, {{name}}! Ești gata pentru azi?",
+  "addTask": "Adaugă Sarcină",
+  "placeholderQuickAdd": "Adaugă rapid (ex: 'Cumpărături la 18:00')",
+  "noTasks": "Nicio sarcină — adaugă ceva pentru a începe!",
+  "tasksDone": "{{done}}/{{total}} sarcini făcute",
+  "goals": "Obiective",
+  "addGoal": "Adaugă Obiectiv",
+  "delete": "Șterge",
+  "edit": "Editează",
+  "priority": "Prioritate",
+  "low": "Mică",
+  "medium": "Mediu",
+  "high": "Ridicată",
+  "confirmDelete": "Ești sigur că vrei să ștergi asta?",
+  "greatJob": "Excelent! Ești în flăcări! 🔥",
+  "sendToBot": "Trimite la Bot"
+}

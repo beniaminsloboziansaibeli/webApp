@@ -1,0 +1,19 @@
+{
+  "appTitle": "Daily Planner",
+  "greeting": "Hello, {{name}}! Ready for today?",
+  "addTask": "Add Task",
+  "placeholderQuickAdd": "Quick add (e.g. 'Walk dog at 18:00')",
+  "noTasks": "No tasks yet — add something to get started!",
+  "tasksDone": "{{done}}/{{total}} tasks done",
+  "goals": "Goals",
+  "addGoal": "Add Goal",
+  "delete": "Delete",
+  "edit": "Edit",
+  "priority": "Priority",
+  "low": "Low",
+  "medium": "Medium",
+  "high": "High",
+  "confirmDelete": "Are you sure you want to delete this?",
+  "greatJob": "Great job! You're on fire! 🔥",
+  "sendToBot": "Share with Bot"
+}
