@@ -1,5 +1,6 @@
 import React from 'react'
 import { motion } from 'framer-motion'
+import { pop, press } from '../lib/motion'
 import { Settings, Share2, Expand } from 'lucide-react'
 
 type HeaderProps = {
@@ -18,7 +19,7 @@ export default function Header({
   onExpand,
 }: HeaderProps) {
   return (
-    <header className="w-full px-4 pt-6 pb-2 flex items-center justify-between">
+  <header className="w-full px-4 pt-6 pb-2 flex items-center justify-between">
       <div className="flex items-center gap-3">
         <div className="flex flex-col">
           <h1 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
@@ -32,49 +33,21 @@ export default function Header({
 
       <div className="flex items-center gap-2">
         <div className="flex items-center mr-3">
-          <motion.div
-            key={streak}
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-            className="px-3 py-1 rounded-full bg-gradient-to-r from-amber-100 to-amber-50 text-amber-700 text-sm font-medium shadow-sm"
-            title="Streak"
-          >
+          <motion.div key={streak} initial="hidden" animate="visible" variants={pop} className="px-3 py-1 rounded-full card-glass text-amber-700 text-sm font-medium shadow-sm" title="Streak">
             🔥 {streak}
           </motion.div>
         </div>
 
         <div className="flex items-center gap-2">
-          <motion.button
-            whileTap={{ scale: 0.92 }}
-            whileHover={{ scale: 1.03 }}
-            onClick={onOpenSettings}
-            aria-label="Settings"
-            className="p-2 rounded-lg bg-white/70 dark:bg-slate-700/60 hover:shadow-md"
-            title="Settings"
-          >
+          <motion.button onClick={onOpenSettings} aria-label="Settings" className="p-2 rounded-lg btn-glass" title="Settings" whileTap="press" variants={press} initial="rest">
             <Settings size={18} />
           </motion.button>
 
-          <motion.button
-            whileTap={{ scale: 0.92 }}
-            whileHover={{ scale: 1.03 }}
-            onClick={onShare}
-            aria-label="Share"
-            className="p-2 rounded-lg bg-white/70 dark:bg-slate-700/60 hover:shadow-md"
-            title="Share tasks"
-          >
+          <motion.button onClick={onShare} aria-label="Share" className="p-2 rounded-lg btn-glass" title="Share tasks" whileTap="press" variants={press} initial="rest">
             <Share2 size={18} />
           </motion.button>
 
-          <motion.button
-            whileTap={{ scale: 0.92 }}
-            whileHover={{ scale: 1.03 }}
-            onClick={onExpand}
-            aria-label="Expand"
-            className="p-2 rounded-lg bg-white/70 dark:bg-slate-700/60 hover:shadow-md"
-            title="Expand"
-          >
+          <motion.button onClick={onExpand} aria-label="Expand" className="p-2 rounded-lg btn-glass" title="Expand" whileTap="press" variants={press} initial="rest">
             <Expand size={18} />
           </motion.button>
         </div>

@@ -6,12 +6,22 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: '#3B82F6',
-        cream: '#F3F4F6',
-        success: '#10B981',
-        danger: '#EF4444'
+        primary: 'var(--primary)',
+        'primary-600': 'var(--primary-600)',
+        surface: 'var(--surface)',
+        'card-glass': 'var(--card-glass)',
+        muted: 'var(--muted)',
+        success: 'var(--success)',
+        danger: 'var(--danger)'
+      },
+      borderRadius: {
+        md: '12px',
+        lg: '16px'
+      },
+      boxShadow: {
+        soft: 'var(--shadow-soft)'
       }
     }
   },
-  plugins: []
+  plugins: [require('@tailwindcss/forms')]
 }

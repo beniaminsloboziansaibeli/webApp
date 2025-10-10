@@ -10,16 +10,20 @@ import AddTaskForm from './components/AddTaskForm'
 import TaskItem from './components/TaskItem'
 import ProgressBar from './components/ProgressBar'
 import Goals from './components/Goals'
+import CalendarView from './components/CalendarView'
+import AgendaView from './components/AgendaView'
 import Confetti from 'react-confetti'
 import { AnimatePresence, motion } from 'framer-motion'
-import { differenceInCalendarDays } from 'date-fns'
+import { differenceInCalendarDays, format } from 'date-fns'
 import CompletionModal from './components/CompletionModal'
-import { playChime } from './utils/audio'
+import { playRandomSound } from './utils/audio'
 import { bumpStreak, loadStreak } from './utils/streak'
 import SettingsModal from './components/SettingsModal'
 import { loadSettings, saveSettings, Settings as SettingsType } from './utils/settings'
 import { applyTelegramTheme } from './utils/telegram'
 import i18n from 'i18next'
+import FAB from './components/FAB'
+import BottomNav from './components/BottomNav'
 
 const App: React.FC = () => {
   const { t } = useTranslation()
@@ -29,8 +33,14 @@ const App: React.FC = () => {
   const [showConfetti, setShowConfetti] = useState(false)
   const [showModal, setShowModal] = useState(false)
   const [userName, setUserName] = useState('')
-  const [streak, setStreak] = useState<number>(() => loadStreak()) // util func
+  const [streak, setStreak] = useState<number>(() => {
+    try {
+      const s = loadStreak() as any
+      return (s && typeof s.count === 'number') ? s.count : 0
+    } catch { return 0 }
+  }) // util func
   const [settings, setSettings] = useState<SettingsType>(() => loadSettings())
+  const [view, setView] = useState<'today' | 'calendar' | 'agenda'>('today')
 
   useEffect(() => {
     const tg = initTelegram()
@@ -60,8 +70,8 @@ const App: React.FC = () => {
 
   const doneCount = tasks.filter((t) => t.completed).length
 
-  const addTask = (title: string, time?: string, priority: Task['priority'] = 'low') => {
-    const task: Task = { id: uuidv4(), title, time, priority, completed: false, createdAt: new Date().toISOString() }
+  const addTask = (title: string, time?: string, priority: Task['priority'] = 'low', date?: string) => {
+    const task: Task = { id: uuidv4(), title, time, priority, completed: false, createdAt: new Date().toISOString(), date }
     setTasks((s) => [task, ...s])
   }
 
@@ -77,17 +87,41 @@ const App: React.FC = () => {
   const deleteTask = (id: string) => {
     setTasks((s: Task[]) => s.filter((t: Task) => t.id !== id))
   }
+  const [modalMessage, setModalMessage] = useState<string | undefined>(undefined)
 
   const completeTask = (id: string) => {
     updateTask(id, { completed: true })
     setShowConfetti(true)
-    // try vibrate
-    try { if (settings.vibrate) navigator.vibrate?.(200) } catch {}
-    // play chime
-    try { if (settings.sound) playChime() } catch {}
-    // update streak and show modal
-    const s = bumpStreak()
+    // vibration if enabled
+    try { if (settings?.vibrate) navigator.vibrate?.(200) } catch {}
+  // play random success sound (respect settings volume)
+  try { playRandomSound(settings?.volume) } catch {}
+
+    // pick a random motivational message
+    const base = [
+      'Nice! That one is out of the way. 🎯',
+      "Boom — you're crushing it! 💥",
+      'Another win. Keep the flow going! 🔥',
+      'Lovely! That was satisfying. ✨',
+      "You're unstoppable today! 🚀"
+    ]
+    const priorityMsgs: Record<string,string[]> = {
+      high: ['High priority DONE — legend! 🦸‍♂️','You tackled a big one — respect! 👏'],
+      medium: ['Solid work — medium task cleared! ✅','Nice rhythm — keep going! 🎵'],
+      low: ['Small win — celebrate! 🥳','Nice and tidy — small wins add up!']
+    }
+    const extra = priorityMsgs[((): string => {
+      try { const p = tasks.find(t => t.id === id)?.priority; return p ?? 'low' } catch { return 'low' }
+    })()]
+    const pool = [...base, ...(extra || [])]
+    const picked = pool[Math.floor(Math.random() * pool.length)]
+    setModalMessage(picked)
     setShowModal(true)
+
+    // update streak and reflect it
+    const s = bumpStreak()
+    try { setStreak(s.count || 0) } catch {}
+
     setTimeout(() => setShowConfetti(false), 2500)
   }
 
@@ -135,43 +169,57 @@ const App: React.FC = () => {
   return (
     <div className="app-container min-h-screen p-4">
       {showConfetti && <Confetti recycle={false} numberOfPieces={200} />}
-      <Header name={userName || 'Friend'} onShare={shareWithBot} onOpenSettings={handleOpenSettings} onExpand={handleExpand} />
+  <Header userName={userName || 'Friend'} streak={streak} onShare={shareWithBot} onOpenSettings={handleOpenSettings} onExpand={handleExpand} />
 
       <main className="mt-4">
         <div className="bg-white shadow-md rounded-xl p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <button onClick={() => setView('today')} className={`px-3 py-1 rounded ${view === 'today' ? 'btn-primary text-white' : 'btn-glass'}`}>Today</button>
+            <button onClick={() => setView('calendar')} className={`px-3 py-1 rounded ${view === 'calendar' ? 'btn-primary text-white' : 'btn-glass'}`}>Calendar</button>
+            <button onClick={() => setView('agenda')} className={`px-3 py-1 rounded ${view === 'agenda' ? 'btn-primary text-white' : 'btn-glass'}`}>Agenda</button>
+          </div>
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">{t('tasksDone', { done: doneCount, total: tasks.length })}</h2>
             <div className="text-sm text-gray-500">Streak: <strong>Day 1</strong></div>
           </div>
           <ProgressBar value={tasks.length ? (doneCount / tasks.length) * 100 : 0} />
 
-          <div className="mt-4">
-            <AddTaskForm onAdd={(title: string, time?: string, priority?: Task['priority']) => addTask(title, time, priority)} onQuickAdd={(text: string) => quickAdd(text)} />
-          </div>
+          {view === 'today' ? (
+            <>
+              <div className="mt-4">
+                <AddTaskForm onAdd={(title: string, time?: string, priority?: Task['priority']) => addTask(title, time, priority)} onQuickAdd={(text: string) => quickAdd(text)} />
+              </div>
 
-          <div className="mt-4 space-y-2 max-h-[50vh] overflow-auto">
-            <AnimatePresence>
-              {sortedTasks.length === 0 && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-6 text-center text-gray-500">
-                  {t('noTasks')}
-                </motion.div>
-              )}
-              {sortedTasks.map((task: Task, i: number) => (
-                <motion.div key={task.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}>
-                  <TaskItem task={task} onToggle={() => completeTask(task.id)} onDelete={() => deleteTask(task.id)} onEdit={(patch: Partial<Task>) => updateTask(task.id, patch)} />
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
+              <div className="mt-4 space-y-2 max-h-[50vh] overflow-auto">
+                <AnimatePresence>
+                  {sortedTasks.filter(t => !t.date || t.date === format(new Date(), 'yyyy-MM-dd')).length === 0 && (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-6 text-center text-gray-500">
+                      {t('noTasks')}
+                    </motion.div>
+                  )}
+                  {sortedTasks.filter(t => !t.date || t.date === format(new Date(), 'yyyy-MM-dd')).map((task: Task, i: number) => (
+                    <motion.div key={task.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}>
+                      <TaskItem task={task} onToggle={() => completeTask(task.id)} onDelete={() => deleteTask(task.id)} onEdit={(patch: Partial<Task>) => updateTask(task.id, patch)} />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+            </>
+          ) : view === 'calendar' ? (
+            <CalendarView tasks={tasks} onAdd={addTask} onUpdate={updateTask} onDelete={deleteTask} />
+          ) : (
+            <AgendaView tasks={tasks} onUpdate={updateTask} onDelete={deleteTask} />
+          )}
         </div>
 
         <div className="mt-4">
           <Goals goals={goals} setGoals={setGoals} />
         </div>
       </main>
-  <CompletionModal open={showModal} onClose={() => setShowModal(false)} />
+  <CompletionModal open={showModal} onClose={() => setShowModal(false)} message={modalMessage} />
   <SettingsModal open={settingsOpen} settings={settings} onClose={(next) => { if (next) { setSettings(next); saveSettings(next) } setSettingsOpen(false) }} />
-  <button onClick={() => setSettingsOpen(true)} className="fixed bottom-6 right-4 p-3 rounded-full btn-primary shadow">⚙</button>
+  <FAB onClick={() => setSettingsOpen(true)} />
+  <BottomNav active={view} onNavigate={(v) => { if (v === 'settings') setSettingsOpen(true); else setView(v as any) }} />
       <footer className="p-4 text-center text-xs text-gray-500">Daily Planner • Built for Telegram WebApps</footer>
     </div>
   )
@@ -179,9 +227,4 @@ const App: React.FC = () => {
 
 export default App
 
-export interface HeaderProps {
-  name: string
-  onShare: () => void
-  onOpenSettings: () => void
-  onExpand: () => void
-}
+// End of App

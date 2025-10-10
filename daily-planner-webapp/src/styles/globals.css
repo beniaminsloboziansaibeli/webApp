@@ -3,13 +3,35 @@
 @tailwind utilities;
 
 :root{
-  --bg: #F9FAFB;
-  --card: #FFFFFF;
-  --muted: #6B7280;
-  --glass: rgba(255,255,255,0.6);
-  --primary-start: #60A5FA;
-  --primary-end: #3B82F6;
+  --bg: #FAFBFC;
+  --surface: #F4F5F7;
+  --card-glass: rgba(255,255,255,0.76);
+  --muted: #6E6E73;
+  --primary: #007AFF;
+  --primary-600: #0063E6;
+  --success: #32D74B;
+  --danger: #FF3B30;
+  --shadow-soft: 0 6px 18px rgba(16,24,40,0.06);
+  --glass-blur: blur(10px) saturate(120%);
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --ui-ease: cubic-bezier(.2,.9,.25,1);
+  --glass-highlight: rgba(255,255,255,0.6);
 }
+
+/* Dark theme variables; applied when <html data-theme="dark"> is set by Telegram theme mapping */
+:root[data-theme='dark']{
+  --bg: #0B1220;
+  --card: rgba(17,24,39,0.6);
+  --muted: #94A3B8;
+  --glass: rgba(255,255,255,0.04);
+  --primary-start: #2563EB;
+  --primary-end: #4F46E5;
+}
+
+/* Smooth transitions for theme and micro-interactions */
+*{ transition: background-color 240ms ease, color 220ms ease, border-color 220ms ease, box-shadow 220ms ease; }
 
 html,body,#root{
   height:100%;
@@ -17,18 +39,49 @@ html,body,#root{
 
 body{
   font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
-  background: linear-gradient(180deg,#FBFDFF 0%,var(--bg) 100%);
-  color: #111827;
+  background: linear-gradient(180deg, var(--bg) 0%, #ffffff 100%);
+  color: #1C1C1E;
 }
 
 .app-container{
-  max-width:560px;
+  max-width:640px;
   margin:0 auto;
+  padding-bottom: 48px;
 }
 
-.card-glass{ background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.5)); backdrop-filter: blur(6px); }
+.glass-bg{
+  background: linear-gradient(180deg, rgba(255,255,255,0.65), rgba(255,255,255,0.48));
+  backdrop-filter: blur(10px) saturate(120%);
+  border: 1px solid rgba(255,255,255,0.4);
+}
+
+.card-glass{ background: linear-gradient(180deg, rgba(255,255,255,0.80), rgba(250,250,255,0.6)); backdrop-filter: var(--glass-blur); border: 1px solid rgba(255,255,255,0.5); border-radius: var(--radius-md); }
+
+.glass-soft{ background: linear-gradient(180deg, rgba(255,255,255,0.5), rgba(250,250,255,0.3)); border-radius: 18px; }
+
+.rounded-xl-2xl{ border-radius: 18px; }
+
+.floating{ box-shadow: 0 10px 30px rgba(16,24,40,0.06); }
 
 .btn-primary{ background: linear-gradient(90deg,var(--primary-start),var(--primary-end)); color:white; }
+
+.soft-text{ color: #475569 }
+
+.glass-task { background: linear-gradient(180deg, rgba(255,255,255,0.80), rgba(250,250,255,0.6)); border: 1px solid rgba(255,255,255,0.6); border-radius: var(--radius-md); box-shadow: var(--shadow-soft); padding: 14px; }
+
+.shimmer{ position:relative; overflow:hidden; }
+.shimmer::after{ content:''; position:absolute; left:-120%; top:0; width:40%; height:100%; background:linear-gradient(120deg, rgba(255,255,255,0), rgba(255,255,255,0.35), rgba(255,255,255,0)); transform:skewX(-20deg); animation: shimmer 1.6s infinite; }
+@keyframes shimmer{ 0%{ left:-120% } 100%{ left:220% } }
+
+.glass-header{ background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(250,250,255,0.7)); border-radius: var(--radius-lg); padding: 16px; border: 1px solid rgba(255,255,255,0.45); box-shadow: var(--shadow-soft); }
+
+.glass-footer{ background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(250,250,255,0.45)); border-top: 1px solid rgba(255,255,255,0.5); }
+
+.card-glass{ background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.5)); backdrop-filter: blur(6px); border-radius: var(--radius-md); }
+
+.btn-primary{ background: linear-gradient(180deg,var(--primary),var(--primary-600)); color:white; border-radius: 14px; padding: 10px 14px; box-shadow: 0 8px 26px rgba(0,122,255,0.12); transition: transform 180ms var(--ui-ease), box-shadow 180ms var(--ui-ease), background 180ms var(--ui-ease); }
+.btn-primary:active{ transform: translateY(1px) scale(0.996); box-shadow: 0 6px 20px rgba(0,122,255,0.08); }
+.btn-glass{ background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.45)); border-radius: 12px; padding: 8px 10px; backdrop-filter: var(--glass-blur); border: 1px solid rgba(255,255,255,0.5); }
 
 .floating{ box-shadow: 0 8px 30px rgba(16,24,40,0.06); }
 
@@ -39,4 +92,24 @@ body{
 @keyframes shimmer{ 0%{ left:-120% } 100%{ left:220% } }
 
 /* Modal backdrop handled inline */
+
+/* Priority dot visuals */
+.priority-dot{ width:11px; height:11px; border-radius:9999px; display:inline-block; box-shadow: 0 6px 16px rgba(16,24,40,0.06); position:relative }
+.priority-dot::after{ content:''; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:14px; height:14px; border-radius:50%; opacity:0; transition: opacity 360ms ease, transform 360ms ease }
+.priority-dot.high{ background: linear-gradient(90deg,#f97373,#ef4444); }
+.priority-dot.medium{ background: linear-gradient(90deg,#fbbf24,#f59e0b); }
+.priority-dot.low{ background: linear-gradient(90deg,#86efac,#4ade80); }
+.priority-dot.pulse::after{ opacity:0.14; transform:translate(-50%,-50%) scale(1.05); background: radial-gradient(circle, rgba(255,255,255,0.3), rgba(0,0,0,0)); }
+
+.calendar-legend{ display:flex; gap:10px; align-items:center; font-size:12px; color:var(--muted); }
+.calendar-legend .item{ display:flex; gap:6px; align-items:center }
+
+/* small badge for time-of-day coloring */
+.time-badge{ font-size:12px; padding:4px 8px; border-radius:999px; background:linear-gradient(180deg, rgba(255,255,255,0.8), rgba(250,250,255,0.7)); backdrop-filter: blur(6px); box-shadow: 0 6px 16px rgba(16,24,40,0.04); transition: transform 220ms var(--ui-ease); }
+.time-badge:hover{ transform: translateY(-2px); }
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important }
+}
 
