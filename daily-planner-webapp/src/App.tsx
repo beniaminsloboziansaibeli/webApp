@@ -23,21 +23,19 @@ import i18n from 'i18next'
 
 const App: React.FC = () => {
   const { t } = useTranslation()
-  const [tasks, setTasks] = useState<Task[]>(() => loadTasks())
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const [tasks, setTasks] = useState<Task[]>(() => loadTasks()) // asumezi util persistence
   const [goals, setGoals] = useState<Goal[]>(() => loadGoals())
   const [showConfetti, setShowConfetti] = useState(false)
   const [showModal, setShowModal] = useState(false)
   const [userName, setUserName] = useState('')
-  const [streak, setStreak] = useState<number>(0)
+  const [streak, setStreak] = useState<number>(() => loadStreak()) // util func
   const [settings, setSettings] = useState<SettingsType>(() => loadSettings())
-  const [settingsOpen, setSettingsOpen] = useState(false)
 
   useEffect(() => {
     const tg = initTelegram()
     const info = getUserInfo()
     if (info?.name) setUserName(info.name)
-    try { const s = loadStreak(); setStreak(s.count || 0) } catch {}
-    try { const st = loadSettings(); setSettings(st); if (st.lang) { /* ensure i18n follows */ } } catch {}
     // expand if possible
     // Apply Telegram theme when available
     try { const tgWeb = (window as any).WebApp; if (tgWeb?.themeParams) { applyTelegramTheme(tgWeb.themeParams) } } catch {}
@@ -98,10 +96,46 @@ const App: React.FC = () => {
     alert(t('sendToBot'))
   }
 
+  const handleOpenSettings = () => setSettingsOpen(true)
+
+  const handleShare = () => {
+    const payload = { type: 'tasks_share', tasks, ts: Date.now() }
+    const tg = (window as any).Telegram?.WebApp
+    if (tg && typeof tg.sendData === 'function') {
+      try {
+        tg.sendData(JSON.stringify(payload))
+        // visual feedback
+        console.info('Shared to Telegram WebApp (sendData).')
+      } catch (err) {
+        console.warn('sendData failed, fallback to clipboard', err)
+        navigator.clipboard?.writeText(JSON.stringify(payload))
+      }
+    } else {
+      // fallback to clipboard
+      navigator.clipboard?.writeText(JSON.stringify(payload))
+      alert('Tasks copied to clipboard (fallback).')
+    }
+  }
+
+  const handleExpand = () => {
+    const tg = (window as any).Telegram?.WebApp
+    if (tg && typeof tg.expand === 'function') {
+      try {
+        tg.expand()
+      } catch (err) {
+        console.warn('expand failed', err)
+      }
+    } else if (document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen().catch(() => {})
+    } else {
+      // no-op
+    }
+  }
+
   return (
     <div className="app-container min-h-screen p-4">
       {showConfetti && <Confetti recycle={false} numberOfPieces={200} />}
-      <Header name={userName || 'Friend'} onShare={shareWithBot} />
+      <Header name={userName || 'Friend'} onShare={shareWithBot} onOpenSettings={handleOpenSettings} onExpand={handleExpand} />
 
       <main className="mt-4">
         <div className="bg-white shadow-md rounded-xl p-4">
@@ -144,3 +178,10 @@ const App: React.FC = () => {
 }
 
 export default App
+
+export interface HeaderProps {
+  name: string
+  onShare: () => void
+  onOpenSettings: () => void
+  onExpand: () => void
+}

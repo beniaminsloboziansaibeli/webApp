@@ -1,31 +1,84 @@
 import React from 'react'
-import { useTranslation } from 'react-i18next'
-import { Share2, Expand, Settings as SettingsIcon } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { Settings, Share2, Expand } from 'lucide-react'
 
-type HeaderProps = { name: string; onShare: () => void; streak?: number; onSettings?: () => void }
+type HeaderProps = {
+  userName?: string
+  streak?: number
+  onOpenSettings: () => void
+  onShare: () => void
+  onExpand: () => void
+}
 
-const Header: React.FC<HeaderProps> = ({ name, onShare, streak = 0, onSettings = () => {} }: HeaderProps) => {
-  const { t } = useTranslation()
+export default function Header({
+  userName,
+  streak = 0,
+  onOpenSettings,
+  onShare,
+  onExpand,
+}: HeaderProps) {
   return (
-    <header className="flex items-center justify-between">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">{t('appTitle')}</h1>
-        <p className="text-sm text-gray-500 mt-1">{t('greeting', { name })}</p>
-        <div className="mt-1 text-sm text-green-600 font-medium">🔥 {streak} day streak</div>
+    <header className="w-full px-4 pt-6 pb-2 flex items-center justify-between">
+      <div className="flex items-center gap-3">
+        <div className="flex flex-col">
+          <h1 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+            Daily Planner
+          </h1>
+          <p className="text-sm text-slate-500 dark:text-slate-300">
+            {userName ? `Salut, ${userName}!` : 'Salut! Ready for today?'}
+          </p>
+        </div>
       </div>
-      <div className="flex items-center space-x-2">
-        <button onClick={() => { try { (window as any).WebApp?.expand?.() } catch {} }} title="Expand" className="p-2 rounded-lg bg-white border floating pulse-hover">
-          <Expand size={16} />
-        </button>
-        <button onClick={onSettings} title="Settings" className="p-2 rounded-lg bg-white border floating pulse-hover">
-          <SettingsIcon size={16} />
-        </button>
-        <button onClick={onShare} className="p-2 rounded-lg btn-primary floating pulse-hover">
-          <Share2 size={18} />
-        </button>
+
+      <div className="flex items-center gap-2">
+        <div className="flex items-center mr-3">
+          <motion.div
+            key={streak}
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+            className="px-3 py-1 rounded-full bg-gradient-to-r from-amber-100 to-amber-50 text-amber-700 text-sm font-medium shadow-sm"
+            title="Streak"
+          >
+            🔥 {streak}
+          </motion.div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <motion.button
+            whileTap={{ scale: 0.92 }}
+            whileHover={{ scale: 1.03 }}
+            onClick={onOpenSettings}
+            aria-label="Settings"
+            className="p-2 rounded-lg bg-white/70 dark:bg-slate-700/60 hover:shadow-md"
+            title="Settings"
+          >
+            <Settings size={18} />
+          </motion.button>
+
+          <motion.button
+            whileTap={{ scale: 0.92 }}
+            whileHover={{ scale: 1.03 }}
+            onClick={onShare}
+            aria-label="Share"
+            className="p-2 rounded-lg bg-white/70 dark:bg-slate-700/60 hover:shadow-md"
+            title="Share tasks"
+          >
+            <Share2 size={18} />
+          </motion.button>
+
+          <motion.button
+            whileTap={{ scale: 0.92 }}
+            whileHover={{ scale: 1.03 }}
+            onClick={onExpand}
+            aria-label="Expand"
+            className="p-2 rounded-lg bg-white/70 dark:bg-slate-700/60 hover:shadow-md"
+            title="Expand"
+          >
+            <Expand size={18} />
+          </motion.button>
+        </div>
       </div>
     </header>
   )
 }
-
-export default Header
