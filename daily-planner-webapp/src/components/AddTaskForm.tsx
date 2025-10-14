@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import { cardEnter } from '../lib/motion'
+import useReducedMotion from '../lib/useReducedMotion'
 
 type AddTaskFormProps = {
   onAdd: (title: string, time?: string, priority?: 'low' | 'medium' | 'high') => void
@@ -23,8 +24,10 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({ onAdd, onQuickAdd }: AddTaskF
     setPriority('low')
   }
 
+  const reduced = useReducedMotion()
+
   return (
-  <motion.form onSubmit={submit} initial="hidden" animate="visible" variants={cardEnter} className="space-y-3 card-glass p-3 rounded-lg">
+  <motion.form onSubmit={submit} initial={reduced ? undefined : 'hidden'} animate={reduced ? undefined : 'visible'} variants={reduced ? undefined : cardEnter} className="space-y-3 card-glass p-3 rounded-lg">
       <div className="flex gap-2">
   <input aria-label="Task title" className="flex-1 p-3 rounded-lg border" placeholder={t('placeholderQuickAdd') as string} value={title} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)} />
   <input aria-label="Time" type="time" className="w-28 p-3 rounded-lg border" value={time} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTime(e.target.value)} />

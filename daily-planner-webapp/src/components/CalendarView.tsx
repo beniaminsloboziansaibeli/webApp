@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react'
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, isSameDay, addMonths, subMonths, addWeeks } from 'date-fns'
 import { motion } from 'framer-motion'
 import { cardEnter } from '../lib/motion'
+import useReducedMotion from '../lib/useReducedMotion'
 import { Task } from '../types'
 import TaskItem from './TaskItem'
 import AddTaskForm from './AddTaskForm'
@@ -54,6 +55,8 @@ export default function CalendarView({ tasks, onAdd, onUpdate, onDelete }: Calen
 
   const filteredWeeks = mode === 'month' ? weeks : weekOnly
 
+  const reduced = useReducedMotion()
+
   return (
     <div className="mt-4">
       <div className="flex items-center justify-between mb-3">
@@ -90,7 +93,7 @@ export default function CalendarView({ tasks, onAdd, onUpdate, onDelete }: Calen
               const dayTasks = tasksForDate(day)
               const showDay = showPast ? true : (day >= startOfWeek(new Date()))
               return (
-                <motion.div key={day.toISOString()} onClick={() => setSelected(day)} whileHover={{ y: -4 }} whileTap={{ scale: 0.98 }} transition={{ type: 'spring', stiffness: 300, damping: 26 }} className={`p-3 rounded-lg cursor-pointer ${inMonth ? 'glass-task' : 'opacity-40'} ${isSel ? 'ring-2 ring-offset-2 ring-indigo-400' : ''}`} aria-label={`Day ${format(day,'d')}`}>
+                <motion.div key={day.toISOString()} onClick={() => setSelected(day)} whileHover={reduced ? undefined : { y: -4 }} whileTap={reduced ? undefined : { scale: 0.98 }} transition={reduced ? undefined : { type: 'spring', stiffness: 300, damping: 26 }} className={`p-3 rounded-lg cursor-pointer ${inMonth ? 'glass-task' : 'opacity-40'} ${isSel ? 'ring-2 ring-offset-2 ring-indigo-400' : ''}`} aria-label={`Day ${format(day,'d')}`}>
                   <div className={`w-full h-8 flex items-center justify-center ${isSel ? 'font-semibold' : ''}`}>{format(day,'d')}</div>
                   <div className="mt-2 space-y-1">
                     {dayTasks.slice(0,2).map(t => (

@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Task } from '../types'
 import { motion } from 'framer-motion'
+import useReducedMotion from '../lib/useReducedMotion'
 import { Trash2, Edit2 } from 'lucide-react'
 
 type TaskItemProps = {
@@ -19,14 +20,16 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onToggle, onDelete, onEdit }:
     setEditing(false)
   }
 
+  const reduced = useReducedMotion()
+
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, y: 10, scale: 0.995 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: -8 }}
-      whileHover={{ scale: 1.02, y: -4 }}
-      transition={{ type: 'spring', stiffness: 320, damping: 28 }}
+      initial={reduced ? undefined : { opacity: 0, y: 10, scale: 0.995 }}
+      animate={reduced ? undefined : { opacity: 1, y: 0, scale: 1 }}
+      exit={reduced ? undefined : { opacity: 0, y: -8 }}
+      whileHover={reduced ? undefined : { scale: 1.02, y: -4 }}
+      transition={reduced ? undefined : { type: 'spring', stiffness: 320, damping: 28 }}
       className={`p-3 flex items-center justify-between ${task.completed ? 'bg-green-50' : 'bg-white'} floating glass-task`}
     >
   <div className="flex items-center gap-3">

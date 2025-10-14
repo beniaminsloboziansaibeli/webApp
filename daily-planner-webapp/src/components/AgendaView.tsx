@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react'
 import { format, startOfWeek, addDays, addWeeks, subWeeks, isSameDay } from 'date-fns'
 import { motion } from 'framer-motion'
 import { cardEnter } from '../lib/motion'
+import useReducedMotion from '../lib/useReducedMotion'
 import { Task } from '../types'
 import TaskItem from './TaskItem'
 
@@ -38,6 +39,8 @@ export default function AgendaView({ tasks, onUpdate, onDelete }: AgendaViewProp
 
   const onDragOver = (e: React.DragEvent) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move' }
 
+  const reduced = useReducedMotion()
+
   return (
     <div className="mt-4">
       <div className="flex items-center justify-between mb-3">
@@ -53,7 +56,7 @@ export default function AgendaView({ tasks, onUpdate, onDelete }: AgendaViewProp
 
       <div className="grid grid-cols-7 gap-2">
         {days.map(day => (
-          <motion.div key={day.toISOString()} className="p-3 rounded-lg glass-task min-h-[120px]" onDragOver={onDragOver} onDrop={(e) => onDropTo(e, day)} aria-label={`Column for ${format(day,'EEEE')}`}>
+          <motion.div key={day.toISOString()} className="p-3 rounded-lg glass-task min-h-[120px]" onDragOver={onDragOver} onDrop={(e) => onDropTo(e, day)} aria-label={`Column for ${format(day,'EEEE')}`} whileTap={reduced ? undefined : { scale: 0.995 }}>
             <div className="text-xs text-gray-500 mb-2">{format(day,'EEE d')}</div>
             <div className="space-y-2">
               {tasksFor(day).length === 0 ? <div className="text-sm text-gray-400">No tasks</div> : tasksFor(day).map(t => (

@@ -24,10 +24,12 @@ import { applyTelegramTheme } from './utils/telegram'
 import i18n from 'i18next'
 import FAB from './components/FAB'
 import BottomNav from './components/BottomNav'
+import QuickAddModal from './components/QuickAddModal'
 
 const App: React.FC = () => {
   const { t } = useTranslation()
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [quickAddOpen, setQuickAddOpen] = useState(false)
   const [tasks, setTasks] = useState<Task[]>(() => loadTasks()) // asumezi util persistence
   const [goals, setGoals] = useState<Goal[]>(() => loadGoals())
   const [showConfetti, setShowConfetti] = useState(false)
@@ -48,7 +50,14 @@ const App: React.FC = () => {
     if (info?.name) setUserName(info.name)
     // expand if possible
     // Apply Telegram theme when available
-    try { const tgWeb = (window as any).WebApp; if (tgWeb?.themeParams) { applyTelegramTheme(tgWeb.themeParams) } } catch {}
+    try {
+      const tgWeb = (window as any).WebApp || (window as any).Telegram?.WebApp
+      if (tgWeb?.themeParams) { applyTelegramTheme(tgWeb.themeParams) }
+      // try to expand Telegram WebApp to use full space on mobile
+      if (tgWeb && typeof tgWeb.expand === 'function') {
+        try { tgWeb.expand() } catch (err) { console.warn('Telegram expand failed', err) }
+      }
+    } catch (e) { console.warn('applyTelegramTheme/init failed', e) }
     try { const st = loadSettings(); if (st?.lang) i18n.changeLanguage(st.lang) } catch {}
     // eslint-disable-next-line
   }, [])
@@ -218,7 +227,8 @@ const App: React.FC = () => {
       </main>
   <CompletionModal open={showModal} onClose={() => setShowModal(false)} message={modalMessage} />
   <SettingsModal open={settingsOpen} settings={settings} onClose={(next) => { if (next) { setSettings(next); saveSettings(next) } setSettingsOpen(false) }} />
-  <FAB onClick={() => setSettingsOpen(true)} />
+  <QuickAddModal open={quickAddOpen} onClose={() => setQuickAddOpen(false)} onSave={(title: string, time?: string, priority?: Task['priority']) => addTask(title, time, priority)} />
+  <FAB onClick={() => setQuickAddOpen(true)} />
   <BottomNav active={view} onNavigate={(v) => { if (v === 'settings') setSettingsOpen(true); else setView(v as any) }} />
       <footer className="p-4 text-center text-xs text-gray-500">Daily Planner • Built for Telegram WebApps</footer>
     </div>
