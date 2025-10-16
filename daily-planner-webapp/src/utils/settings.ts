@@ -2,13 +2,15 @@ export type Settings = {
   sound: boolean
   vibrate: boolean
   lang: string
+  theme?: 'dark' | 'light'
   volume?: number
   reducedMotion?: boolean
+  username?: string
 }
 
 const KEY = 'dp_settings_v1'
 
-export const defaultSettings: Settings = { sound: true, vibrate: true, lang: 'en', volume: 0.12, reducedMotion: false }
+export const defaultSettings: Settings = { sound: true, vibrate: true, lang: 'en', theme: 'dark', volume: 0.12, reducedMotion: false, username: '' }
 
 export const loadSettings = (): Settings => {
   try {

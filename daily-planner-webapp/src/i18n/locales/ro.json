@@ -16,4 +16,22 @@
   "confirmDelete": "Ești sigur că vrei să ștergi asta?",
   "greatJob": "Excelent! Ești în flăcări! 🔥",
   "sendToBot": "Trimite la Bot"
+  ,"moodSaved": "Starea a fost salvată",
+  "undo": "Anulează"
+  ,"settings": "Setări",
+  "sound": "Sunet",
+  "reducedMotion": "Mișcare redusă",
+  "language": "Limbă",
+  "username": "Nume",
+  "how_feel": "Cum te simți?",
+  "chooseEmoji": "Alege un emoji pentru a înregistra starea (sau sară)",
+  "skip": "Sari",
+  "more": "mai multe",
+  "today": "Azi",
+  "calendar": "Calendar",
+  "agenda": "Agendă",
+  "weekly_mood": "Starea săptămânii"
+  ,"theme": "Temă",
+  "dark": "Întunecat",
+  "light": "Deschis"
 }

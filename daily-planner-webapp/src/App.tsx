@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { v4 as uuidv4 } from 'uuid'
 import { Task, Goal } from './types'
-import { loadTasks, saveTasks, loadGoals, saveGoals } from './utils/storage'
+import { loadTasks, saveTasks, loadGoals, saveGoals, loadMoods, saveMoods } from './utils/storage'
 import { parseQuickAdd } from './utils/parseQuickAdd'
 import { initTelegram, sendDataToBot, getUserInfo } from './utils/telegram'
 import Header from './components/Header'
@@ -16,6 +16,7 @@ import Confetti from 'react-confetti'
 import { AnimatePresence, motion } from 'framer-motion'
 import { differenceInCalendarDays, format } from 'date-fns'
 import CompletionModal from './components/CompletionModal'
+import EmotionModal from './components/EmotionModal'
 import { playRandomSound } from './utils/audio'
 import { bumpStreak, loadStreak } from './utils/streak'
 import SettingsModal from './components/SettingsModal'
@@ -34,6 +35,12 @@ const App: React.FC = () => {
   const [goals, setGoals] = useState<Goal[]>(() => loadGoals())
   const [showConfetti, setShowConfetti] = useState(false)
   const [showModal, setShowModal] = useState(false)
+  const [emotionOpen, setEmotionOpen] = useState(false)
+  const [moods, setMoods] = useState<Record<string,any>>(() => {
+    try { return loadMoods() } catch { return {} }
+  })
+  const [lastMoodChange, setLastMoodChange] = useState<{date: string, prev?: string} | null>(null)
+  const [undoVisible, setUndoVisible] = useState(false)
   const [userName, setUserName] = useState('')
   const [streak, setStreak] = useState<number>(() => {
     try {
@@ -59,11 +66,18 @@ const App: React.FC = () => {
       }
     } catch (e) { console.warn('applyTelegramTheme/init failed', e) }
     try { const st = loadSettings(); if (st?.lang) i18n.changeLanguage(st.lang) } catch {}
+    // apply theme from saved settings (default is dark)
+    try { const st = loadSettings(); if (st?.theme) { document.documentElement.setAttribute('data-theme', st.theme) } else { document.documentElement.setAttribute('data-theme', 'dark') } } catch {}
     // eslint-disable-next-line
   }, [])
 
   useEffect(() => saveTasks(tasks), [tasks])
   useEffect(() => saveGoals(goals), [goals])
+  // When settings change, persist and apply theme immediately
+  useEffect(() => {
+    try { saveSettings(settings) } catch {}
+    try { if (settings?.theme) document.documentElement.setAttribute('data-theme', settings.theme) } catch {}
+  }, [settings])
 
   const sortedTasks = useMemo(() => {
     return [...tasks].sort((a, b) => {
@@ -132,6 +146,8 @@ const App: React.FC = () => {
     try { setStreak(s.count || 0) } catch {}
 
     setTimeout(() => setShowConfetti(false), 2500)
+    // open emotion modal to capture mood for today
+    setEmotionOpen(true)
   }
 
   const shareWithBot = () => {
@@ -178,10 +194,10 @@ const App: React.FC = () => {
   return (
     <div className="app-container min-h-screen p-4">
       {showConfetti && <Confetti recycle={false} numberOfPieces={200} />}
-  <Header userName={userName || 'Friend'} streak={streak} onShare={shareWithBot} onOpenSettings={handleOpenSettings} onExpand={handleExpand} />
+  <Header userName={userName || 'Friend'} streak={streak} todayMood={moods[format(new Date(),'yyyy-MM-dd')]} onShare={shareWithBot} onOpenSettings={handleOpenSettings} onExpand={handleExpand} />
 
       <main className="mt-4">
-        <div className="bg-white shadow-md rounded-xl p-4">
+  <div className="card-glass shadow-md rounded-xl p-4">
           <div className="flex items-center gap-2 mb-3">
             <button onClick={() => setView('today')} className={`px-3 py-1 rounded ${view === 'today' ? 'btn-primary text-white' : 'btn-glass'}`}>Today</button>
             <button onClick={() => setView('calendar')} className={`px-3 py-1 rounded ${view === 'calendar' ? 'btn-primary text-white' : 'btn-glass'}`}>Calendar</button>
@@ -215,9 +231,9 @@ const App: React.FC = () => {
               </div>
             </>
           ) : view === 'calendar' ? (
-            <CalendarView tasks={tasks} onAdd={addTask} onUpdate={updateTask} onDelete={deleteTask} />
+            <CalendarView tasks={tasks} onAdd={addTask} onUpdate={updateTask} onDelete={deleteTask} moods={moods} />
           ) : (
-            <AgendaView tasks={tasks} onUpdate={updateTask} onDelete={deleteTask} />
+            <AgendaView tasks={tasks} onUpdate={updateTask} onDelete={deleteTask} moods={moods} />
           )}
         </div>
 
@@ -226,6 +242,37 @@ const App: React.FC = () => {
         </div>
       </main>
   <CompletionModal open={showModal} onClose={() => setShowModal(false)} message={modalMessage} />
+  <EmotionModal open={emotionOpen} onClose={() => setEmotionOpen(false)} onSelect={(emoji) => {
+    // persist mood for today
+    const key = format(new Date(), 'yyyy-MM-dd')
+  const next = { ...moods }
+  const prev = next[key]
+  if (emoji) next[key] = { emoji, ts: new Date().toISOString() }
+  else delete next[key]
+  setMoods(next)
+  try { saveMoods(next) } catch {}
+  // record for undo
+  setLastMoodChange({ date: key, prev })
+  setUndoVisible(true)
+    // auto-hide undo after 6s
+    setTimeout(() => setUndoVisible(false), 6000)
+    setEmotionOpen(false)
+  }} />
+  {undoVisible && lastMoodChange && (
+    <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50">
+      <div className="px-4 py-2 rounded-lg card-glass flex items-center gap-3">
+        <div className="text-sm">{t('moodSaved')}</div>
+        <button onClick={() => {
+          const next = { ...moods }
+          if (lastMoodChange.prev) next[lastMoodChange.date] = lastMoodChange.prev
+          else delete next[lastMoodChange.date]
+          setMoods(next)
+          try { saveMoods(next) } catch {}
+          setUndoVisible(false)
+        }} className="btn-primary px-3 py-1">{t('undo')}</button>
+      </div>
+    </div>
+  )}
   <SettingsModal open={settingsOpen} settings={settings} onClose={(next) => { if (next) { setSettings(next); saveSettings(next) } setSettingsOpen(false) }} />
   <QuickAddModal open={quickAddOpen} onClose={() => setQuickAddOpen(false)} onSave={(title: string, time?: string, priority?: Task['priority']) => addTask(title, time, priority)} />
   <FAB onClick={() => setQuickAddOpen(true)} />

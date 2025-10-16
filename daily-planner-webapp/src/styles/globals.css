@@ -3,31 +3,52 @@
 @tailwind utilities;
 
 :root{
-  --bg: #FAFBFC;
-  --surface: #F4F5F7;
-  --card-glass: rgba(255,255,255,0.76);
-  --muted: #6E6E73;
-  --primary: #007AFF;
-  --primary-600: #0063E6;
-  --success: #32D74B;
-  --danger: #FF3B30;
-  --shadow-soft: 0 6px 18px rgba(16,24,40,0.06);
-  --glass-blur: blur(10px) saturate(120%);
-  --radius-sm: 10px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
+  /* Dark glass-blue theme tokens */
+  --bg: #0a1a2f; /* deep blue */
+  --bg-2: #0f2740;
+  --surface: rgba(255,255,255,0.03);
+  --card-glass: rgba(255,255,255,0.06);
+  --muted: #9fb0c8;
+  --primary-start: #00b7ff;
+  --primary-end: #6ee7ff;
+  --success: #34d399;
+  --danger: #ff6b6b;
+  --shadow-soft: 0 10px 30px rgba(2,6,23,0.6);
+  --glass-blur: blur(12px) saturate(140%);
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 24px;
   --ui-ease: cubic-bezier(.2,.9,.25,1);
-  --glass-highlight: rgba(255,255,255,0.6);
+  --glass-highlight: rgba(255,255,255,0.06);
+  --glow: 0 8px 30px rgba(56,189,248,0.06);
+  --text: rgba(255,255,255,0.95);
 }
 
 /* Dark theme variables; applied when <html data-theme="dark"> is set by Telegram theme mapping */
+/* legacy toggle kept for Telegram theme mapping */
 :root[data-theme='dark']{
-  --bg: #0B1220;
-  --card: rgba(17,24,39,0.6);
-  --muted: #94A3B8;
-  --glass: rgba(255,255,255,0.04);
-  --primary-start: #2563EB;
-  --primary-end: #4F46E5;
+  /* compatibility mapping if Telegram provides theme params */
+  --bg: #0a1a2f;
+  --bg-2: #0f2740;
+  --text: rgba(255,255,255,0.95);
+}
+
+/* Light theme variables; applied when <html data-theme="light"> */
+:root[data-theme='light']{
+  --bg: #f6f8fb; /* soft light */
+  --bg-2: #eef3f8;
+  --surface: rgba(20,25,30,0.03);
+  --card-glass: rgba(255,255,255,0.75);
+  --muted: #6b7280;
+  --primary-start: #2563eb;
+  --primary-end: #60a5fa;
+  --success: #16a34a;
+  --danger: #dc2626;
+  --shadow-soft: 0 6px 18px rgba(16,24,40,0.06);
+  --glass-blur: blur(6px) saturate(120%);
+  --glass-highlight: rgba(255,255,255,0.8);
+  --glow: 0 6px 18px rgba(96,165,250,0.06);
+  --text: rgba(17,24,39,0.95);
 }
 
 /* Smooth transitions for theme and micro-interactions */
@@ -48,9 +69,9 @@ html,body,#root{
 :root{ --safe-top: env(safe-area-inset-top); --safe-bottom: env(safe-area-inset-bottom); }
 
 body{
-  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
-  background: linear-gradient(180deg, var(--bg) 0%, #ffffff 100%);
-  color: #1C1C1E;
+  font-family: 'Rubik', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  background: radial-gradient(1200px circle at 10% 10%, rgba(0,42,80,0.18), transparent), linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+  color: var(--text);
   margin: 0;
   padding-top: var(--safe-top);
   padding-bottom: var(--safe-bottom);
@@ -71,40 +92,40 @@ body{
 }
 
 .glass-bg{
-  background: linear-gradient(180deg, rgba(255,255,255,0.65), rgba(255,255,255,0.48));
-  backdrop-filter: blur(10px) saturate(120%);
-  border: 1px solid rgba(255,255,255,0.4);
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid rgba(255,255,255,0.04);
 }
 
-.card-glass{ background: linear-gradient(180deg, rgba(255,255,255,0.80), rgba(250,250,255,0.6)); backdrop-filter: var(--glass-blur); border: 1px solid rgba(255,255,255,0.5); border-radius: var(--radius-md); }
+.card-glass{ background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.04)); backdrop-filter: var(--glass-blur); border: 1px solid rgba(255,255,255,0.06); border-radius: var(--radius-md); box-shadow: var(--glow); }
 
-.glass-soft{ background: linear-gradient(180deg, rgba(255,255,255,0.5), rgba(250,250,255,0.3)); border-radius: 18px; }
+.glass-soft{ background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)); border-radius: var(--radius-md); }
 
-.rounded-xl-2xl{ border-radius: 18px; }
+.rounded-xl-2xl{ border-radius: var(--radius-md); }
 
-.floating{ box-shadow: 0 10px 30px rgba(16,24,40,0.06); }
+.floating{ box-shadow: 0 12px 40px rgba(2,6,23,0.7); }
 
-.btn-primary{ background: linear-gradient(90deg,var(--primary-start),var(--primary-end)); color:white; }
+.btn-primary{ background: linear-gradient(90deg,var(--primary-start),var(--primary-end)); color:#012936; border-radius: 12px; }
 
-.soft-text{ color: #475569 }
+.soft-text{ color: var(--muted) }
 
-.glass-task { background: linear-gradient(180deg, rgba(255,255,255,0.80), rgba(250,250,255,0.6)); border: 1px solid rgba(255,255,255,0.6); border-radius: var(--radius-md); box-shadow: var(--shadow-soft); padding: 14px; }
+.glass-task { background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03)); border: 1px solid rgba(255,255,255,0.04); border-radius: var(--radius-md); box-shadow: var(--shadow-soft); padding: 14px; }
 
 .shimmer{ position:relative; overflow:hidden; }
 .shimmer::after{ content:''; position:absolute; left:-120%; top:0; width:40%; height:100%; background:linear-gradient(120deg, rgba(255,255,255,0), rgba(255,255,255,0.35), rgba(255,255,255,0)); transform:skewX(-20deg); animation: shimmer 1.6s infinite; }
 @keyframes shimmer{ 0%{ left:-120% } 100%{ left:220% } }
 
-.glass-header{ background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(250,250,255,0.7)); border-radius: var(--radius-lg); padding: 16px; border: 1px solid rgba(255,255,255,0.45); box-shadow: var(--shadow-soft); }
+.glass-header{ background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)); border-radius: var(--radius-lg); padding: 16px; border: 1px solid rgba(255,255,255,0.04); box-shadow: var(--glow); }
 
-.glass-footer{ background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(250,250,255,0.45)); border-top: 1px solid rgba(255,255,255,0.5); }
+.glass-footer{ background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02)); border-top: 1px solid rgba(255,255,255,0.03); }
 
-.card-glass{ background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.5)); backdrop-filter: blur(6px); border-radius: var(--radius-md); }
+.card-glass{ background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.04)); backdrop-filter: var(--glass-blur); border-radius: var(--radius-md); }
 
-.btn-primary{ background: linear-gradient(180deg,var(--primary),var(--primary-600)); color:white; border-radius: 12px; padding: 0.75rem 1rem; font-size: 1rem; box-shadow: 0 8px 26px rgba(0,122,255,0.12); transition: transform 180ms var(--ui-ease), box-shadow 180ms var(--ui-ease), background 180ms var(--ui-ease); }
-.btn-primary:active{ transform: translateY(1px) scale(0.996); box-shadow: 0 6px 20px rgba(0,122,255,0.08); }
-.btn-glass{ background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.45)); border-radius: 12px; padding: 0.6rem 0.8rem; font-size: 0.95rem; backdrop-filter: var(--glass-blur); border: 1px solid rgba(255,255,255,0.5); }
+.btn-primary{ background: linear-gradient(90deg,var(--primary-start),var(--primary-end)); color:#002233; border-radius: 12px; padding: 0.6rem 0.9rem; font-size: 0.98rem; box-shadow: 0 10px 30px rgba(2,132,199,0.08); transition: transform 180ms var(--ui-ease), box-shadow 180ms var(--ui-ease), background 180ms var(--ui-ease); }
+.btn-primary:active{ transform: translateY(1px) scale(0.996); box-shadow: 0 8px 24px rgba(2,132,199,0.08); }
+.btn-glass{ background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.04)); border-radius: 12px; padding: 0.6rem 0.8rem; font-size: 0.95rem; backdrop-filter: var(--glass-blur); border: 1px solid rgba(255,255,255,0.06); }
 
-.floating{ box-shadow: 0 8px 30px rgba(16,24,40,0.06); }
+.floating{ box-shadow: 0 10px 40px rgba(2,6,23,0.6); }
 
 .pulse-hover:hover{ transform: translateY(-2px) scale(1.01); transition: all 180ms ease; }
 

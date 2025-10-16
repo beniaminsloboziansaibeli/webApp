@@ -1,9 +1,11 @@
 import React, { useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, isSameDay, addMonths, subMonths, addWeeks } from 'date-fns'
 import { motion } from 'framer-motion'
 import { cardEnter } from '../lib/motion'
 import useReducedMotion from '../lib/useReducedMotion'
 import { Task } from '../types'
+import { MoodRecord } from '../utils/storage'
 import TaskItem from './TaskItem'
 import AddTaskForm from './AddTaskForm'
 import EditTaskModal from './EditTaskModal'
@@ -13,13 +15,16 @@ type CalendarViewProps = {
   onAdd: (title: string, time?: string, priority?: Task['priority'], date?: string) => void
   onUpdate: (id: string, patch: Partial<Task>) => void
   onDelete: (id: string) => void
+  moods?: Record<string,MoodRecord>
 }
 
-export default function CalendarView({ tasks, onAdd, onUpdate, onDelete }: CalendarViewProps) {
+export default function CalendarView({ tasks, onAdd, onUpdate, onDelete, moods }: CalendarViewProps) {
+  const { t } = useTranslation()
   const [current, setCurrent] = useState<Date>(new Date())
   const [selected, setSelected] = useState<Date>(new Date())
   const [mode, setMode] = useState<'month' | 'week'>('month')
   const [showPast, setShowPast] = useState<boolean>(true)
+  const [showMoods, setShowMoods] = useState<boolean>(true)
   const [editing, setEditing] = useState<Task | null>(null)
 
   const monthStart = startOfMonth(current)
@@ -72,6 +77,16 @@ export default function CalendarView({ tasks, onAdd, onUpdate, onDelete }: Calen
             <button onClick={() => { setCurrent(new Date()); setSelected(new Date()) }} className="px-3 py-1 rounded btn-primary text-white">Today</button>
             <label className="ml-2 text-sm flex items-center gap-2"><input type="checkbox" checked={showPast} onChange={() => setShowPast(s => !s)} /> Show past</label>
           </div>
+          <div className="flex items-center gap-3">
+            <label className="ml-2 text-sm flex items-center gap-2"><input type="checkbox" checked={showMoods} onChange={() => setShowMoods(s => !s)} /> Show moods</label>
+            {/** small mood legend */}
+            <div className="hidden sm:flex items-center gap-2 text-sm text-gray-500">
+              <div className="flex items-center gap-1">😄</div>
+              <div className="flex items-center gap-1">🙂</div>
+              <div className="flex items-center gap-1">😐</div>
+              <div className="flex items-center gap-1">😞</div>
+            </div>
+          </div>
           <div className="calendar-legend">
             <div className="item"><span className="priority-dot high pulse" title="High priority" aria-label="High priority"></span><span>High</span></div>
             <div className="item"><span className="priority-dot medium" title="Medium priority" aria-label="Medium priority"></span><span>Medium</span></div>
@@ -93,7 +108,7 @@ export default function CalendarView({ tasks, onAdd, onUpdate, onDelete }: Calen
               const dayTasks = tasksForDate(day)
               const showDay = showPast ? true : (day >= startOfWeek(new Date()))
               return (
-                <motion.div key={day.toISOString()} onClick={() => setSelected(day)} whileHover={reduced ? undefined : { y: -4 }} whileTap={reduced ? undefined : { scale: 0.98 }} transition={reduced ? undefined : { type: 'spring', stiffness: 300, damping: 26 }} className={`p-3 rounded-lg cursor-pointer ${inMonth ? 'glass-task' : 'opacity-40'} ${isSel ? 'ring-2 ring-offset-2 ring-indigo-400' : ''}`} aria-label={`Day ${format(day,'d')}`}>
+                <motion.div key={day.toISOString()} onClick={() => setSelected(day)} whileHover={reduced ? undefined : { y: -4 }} whileTap={reduced ? undefined : { scale: 0.98 }} transition={reduced ? undefined : { type: 'spring', stiffness: 300, damping: 26 }} className={`relative p-3 rounded-lg cursor-pointer ${inMonth ? 'glass-task' : 'opacity-40'} ${isSel ? 'ring-2 ring-offset-2 ring-indigo-400' : ''}`} aria-label={`Day ${format(day,'d')}`}>
                   <div className={`w-full h-8 flex items-center justify-center ${isSel ? 'font-semibold' : ''}`}>{format(day,'d')}</div>
                   <div className="mt-2 space-y-1">
                     {dayTasks.slice(0,2).map(t => (
@@ -102,7 +117,11 @@ export default function CalendarView({ tasks, onAdd, onUpdate, onDelete }: Calen
                         <span className="truncate">{t.time ? `${t.time} ` : ''}{t.title}</span>
                       </div>
                     ))}
-                    {dayTasks.length > 2 && <div className="text-[11px] text-gray-400">+{dayTasks.length - 2} more</div>}
+                    {/* mood indicator for the day */}
+                    {showMoods && moods && moods[format(day,'yyyy-MM-dd')] && (
+                      <div className="absolute top-1 right-2 text-lg">{moods[format(day,'yyyy-MM-dd')]?.emoji || moods[format(day,'yyyy-MM-dd')]}</div>
+                    )}
+                    {dayTasks.length > 2 && <div className="text-[11px] text-gray-400">+{dayTasks.length - 2} {t('more')}</div>}
                   </div>
                 </motion.div>
               )
@@ -114,10 +133,22 @@ export default function CalendarView({ tasks, onAdd, onUpdate, onDelete }: Calen
       <div className="mt-4">
         <div className="flex items-center justify-between mb-2">
           <div className="text-sm font-medium">Tasks for {format(selected,'PPP')}</div>
-          <div className="text-xs text-gray-500">{tasksForDate(selected).length} tasks</div>
+            <div className="text-xs text-gray-500">{tasksForDate(selected).length} tasks</div>
         </div>
 
         <div className="bg-white p-3 rounded-xl card-glass">
+          {/* mood summary for selected day */}
+          {moods && moods[format(selected,'yyyy-MM-dd')] && (
+            <div className="mb-3 p-2 rounded-md bg-white/5">
+              <div className="flex items-center gap-3">
+                <div className="text-2xl">{moods[format(selected,'yyyy-MM-dd')].emoji}</div>
+                <div className="text-sm">
+                  {moods[format(selected,'yyyy-MM-dd')].note && <div className="text-xs text-gray-400">{moods[format(selected,'yyyy-MM-dd')].note}</div>}
+                  {moods[format(selected,'yyyy-MM-dd')].intensity && <div className="text-xs text-gray-400">Intensity: {moods[format(selected,'yyyy-MM-dd')].intensity}/5</div>}
+                </div>
+              </div>
+            </div>
+          )}
           <AddTaskForm onAdd={(title, time, priority) => onAdd(title, time, priority, format(selected,'yyyy-MM-dd'))} onQuickAdd={() => {}} />
 
           <div className="mt-3 space-y-2 max-h-[40vh] overflow-auto">

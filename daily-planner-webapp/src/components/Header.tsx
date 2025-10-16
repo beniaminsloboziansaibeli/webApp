@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import { pop, press } from '../lib/motion'
 import useReducedMotion from '../lib/useReducedMotion'
@@ -7,6 +8,7 @@ import { Settings, Share2, Expand } from 'lucide-react'
 type HeaderProps = {
   userName?: string
   streak?: number
+  todayMood?: string
   onOpenSettings: () => void
   onShare: () => void
   onExpand: () => void
@@ -15,30 +17,42 @@ type HeaderProps = {
 export default function Header({
   userName,
   streak = 0,
+  todayMood,
   onOpenSettings,
   onShare,
   onExpand,
 }: HeaderProps) {
   const reduced = useReducedMotion()
+  const { t } = useTranslation()
 
   return (
   <header className="w-full px-4 pt-6 pb-2 flex items-center justify-between">
       <div className="flex items-center gap-3">
         <div className="flex flex-col">
-          <h1 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-            Daily Planner
+          <h1 className="text-lg font-semibold" style={{ background: 'linear-gradient(90deg,#7ee8fa,#4cc9f0)', WebkitBackgroundClip: 'text', color: 'transparent' }}>
+            {t('appTitle')}
           </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-300">
-            {userName ? `Salut, ${userName}!` : 'Salut! Ready for today?'}
+          <p className="text-sm text-muted">
+            {userName ? t('greeting', { name: userName }) : t('greeting', { name: '' })}
           </p>
         </div>
+        {/** today's mood badge placeholder (left side) */}
+        {todayMood && (
+          <div className="ml-3 text-xl">{todayMood}</div>
+        )}
       </div>
 
       <div className="flex items-center gap-2">
         <div className="flex items-center mr-3">
-          <motion.div key={streak} initial={reduced ? undefined : 'hidden'} animate={reduced ? undefined : 'visible'} variants={reduced ? undefined : pop} className="px-3 py-1 rounded-full card-glass text-amber-700 text-sm font-medium shadow-sm" title="Streak">
-            🔥 {streak}
-          </motion.div>
+          <div className="flex items-center gap-2">
+            <motion.div key={streak} initial={reduced ? undefined : 'hidden'} animate={reduced ? undefined : 'visible'} variants={reduced ? undefined : pop} className="px-3 py-1 rounded-full card-glass text-amber-700 text-sm font-medium shadow-sm" title="Streak">
+              🔥 {streak}
+            </motion.div>
+            {/** render mood if provided via props */}
+            {todayMood && (
+              <div className="px-2 py-1 rounded-md bg-white/10 backdrop-blur-sm text-lg">{todayMood}</div>
+            )}
+          </div>
         </div>
 
         <div className="flex items-center gap-2">

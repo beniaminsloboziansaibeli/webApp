@@ -16,4 +16,22 @@
   "confirmDelete": "Are you sure you want to delete this?",
   "greatJob": "Great job! You're on fire! 🔥",
   "sendToBot": "Share with Bot"
+  ,"moodSaved": "Mood saved",
+  "undo": "Undo"
+  ,"settings": "Settings",
+  "sound": "Sound",
+  "reducedMotion": "Reduced motion",
+  "language": "Language",
+  "username": "Username",
+  "how_feel": "How do you feel?",
+  "chooseEmoji": "Choose one emoji to record your mood (or skip)",
+  "skip": "Skip",
+  "more": "more",
+  "today": "Today",
+  "calendar": "Calendar",
+  "agenda": "Agenda",
+  "weekly_mood": "Weekly mood"
+  ,"theme": "Theme",
+  "dark": "Dark",
+  "light": "Light"
 }
