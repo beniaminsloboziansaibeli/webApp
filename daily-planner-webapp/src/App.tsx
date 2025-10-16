@@ -51,6 +51,16 @@ const App: React.FC = () => {
   const [settings, setSettings] = useState<SettingsType>(() => loadSettings())
   const [view, setView] = useState<'today' | 'calendar' | 'agenda'>('today')
 
+  const toggleTheme = () => {
+    try {
+      const nextTheme: 'dark' | 'light' = settings?.theme === 'light' ? 'dark' : 'light'
+      const next: SettingsType = { ...settings, theme: nextTheme }
+      setSettings(next)
+      // saveSettings will also run via effect, but set the attribute now for immediate feedback
+      try { document.documentElement.setAttribute('data-theme', nextTheme) } catch {}
+    } catch (e) { console.warn('toggleTheme failed', e) }
+  }
+
   useEffect(() => {
     const tg = initTelegram()
     const info = getUserInfo()
@@ -194,7 +204,7 @@ const App: React.FC = () => {
   return (
     <div className="app-container min-h-screen p-4">
       {showConfetti && <Confetti recycle={false} numberOfPieces={200} />}
-  <Header userName={userName || 'Friend'} streak={streak} todayMood={moods[format(new Date(),'yyyy-MM-dd')]} onShare={shareWithBot} onOpenSettings={handleOpenSettings} onExpand={handleExpand} />
+  <Header userName={userName || 'Friend'} streak={streak} todayMood={moods[format(new Date(),'yyyy-MM-dd')]} onShare={shareWithBot} onOpenSettings={handleOpenSettings} onExpand={handleExpand} theme={settings?.theme} onToggleTheme={toggleTheme} />
 
       <main className="mt-4">
   <div className="card-glass shadow-md rounded-xl p-4">

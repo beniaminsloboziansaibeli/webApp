@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import { pop, press } from '../lib/motion'
 import useReducedMotion from '../lib/useReducedMotion'
-import { Settings, Share2, Expand } from 'lucide-react'
+import { Settings, Share2, Expand, Sun, Moon } from 'lucide-react'
 
 type HeaderProps = {
   userName?: string
@@ -12,6 +12,8 @@ type HeaderProps = {
   onOpenSettings: () => void
   onShare: () => void
   onExpand: () => void
+  theme?: 'dark' | 'light'
+  onToggleTheme?: () => void
 }
 
 export default function Header({
@@ -21,6 +23,8 @@ export default function Header({
   onOpenSettings,
   onShare,
   onExpand,
+  theme = 'dark',
+  onToggleTheme,
 }: HeaderProps) {
   const reduced = useReducedMotion()
   const { t } = useTranslation()
@@ -56,6 +60,10 @@ export default function Header({
         </div>
 
         <div className="flex items-center gap-2">
+          <motion.button onClick={() => onToggleTheme?.()} aria-label="Toggle theme" className="p-2 rounded-lg btn-glass" title="Toggle theme" whileTap={reduced ? undefined : 'press'} variants={reduced ? undefined : press} initial={reduced ? undefined : 'rest'}>
+            {theme === 'light' ? <Sun size={16} /> : <Moon size={16} />}
+          </motion.button>
+
           <motion.button onClick={onOpenSettings} aria-label="Settings" className="p-2 rounded-lg btn-glass" title="Settings" whileTap={reduced ? undefined : 'press'} variants={reduced ? undefined : press} initial={reduced ? undefined : 'rest'}>
             <Settings size={18} />
           </motion.button>
