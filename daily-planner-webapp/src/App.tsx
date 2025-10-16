@@ -78,6 +78,11 @@ const App: React.FC = () => {
     try { const st = loadSettings(); if (st?.lang) i18n.changeLanguage(st.lang) } catch {}
     // apply theme from saved settings (default is dark)
     try { const st = loadSettings(); if (st?.theme) { document.documentElement.setAttribute('data-theme', st.theme) } else { document.documentElement.setAttribute('data-theme', 'dark') } } catch {}
+    // diagnostic: log current theme and --bg value to help trace unexpected theme changes
+    try {
+      // eslint-disable-next-line no-console
+      console.info('App init theme:', document.documentElement.getAttribute('data-theme'), ' --bg:', getComputedStyle(document.documentElement).getPropertyValue('--bg'))
+    } catch (e) {}
     // eslint-disable-next-line
   }, [])
 
@@ -204,7 +209,7 @@ const App: React.FC = () => {
   return (
     <div className="app-container min-h-screen p-4">
       {showConfetti && <Confetti recycle={false} numberOfPieces={200} />}
-  <Header userName={userName || 'Friend'} streak={streak} todayMood={moods[format(new Date(),'yyyy-MM-dd')]} onShare={shareWithBot} onOpenSettings={handleOpenSettings} onExpand={handleExpand} theme={settings?.theme} onToggleTheme={toggleTheme} />
+  <Header userName={userName || 'Friend'} streak={streak} todayMood={(moods[format(new Date(),'yyyy-MM-dd')] as any)?.emoji} onShare={shareWithBot} onOpenSettings={handleOpenSettings} onExpand={handleExpand} theme={settings?.theme} onToggleTheme={toggleTheme} />
 
       <main className="mt-4">
   <div className="card-glass shadow-md rounded-xl p-4">

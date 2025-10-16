@@ -8,6 +8,7 @@ export interface Task {
   priority: Priority
   completed: boolean
   createdAt: string
+  timeSpentMinutes?: number
 }
 
 export interface Goal {

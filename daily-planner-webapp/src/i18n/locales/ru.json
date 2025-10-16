@@ -34,4 +34,25 @@
   ,"theme": "Тема",
   "dark": "Тёмная",
   "light": "Светлая"
+  ,"mini_report": "Короткий отчёт",
+  "tasks_planned": "запланировано задач",
+  "planned": "Запланировано",
+  "completed": "Выполнено",
+  "time_spent": "Потрачено времени",
+  "completion": "Выполнение",
+  "no_planned_tasks": "Нет запланированных задач",
+  "no_completed_tasks": "Нет выполненных задач"
+  ,"close": "Закрыть",
+  "week_of": "Неделя",
+  "tasks_count": "задач",
+  "no_tasks_short": "Нет задач",
+  "expand": "Открыть"
+  ,"expand_all": "Развернуть всё",
+  "collapse_all": "Свернуть всё"
+  ,"edit_task":"Редактировать задачу",
+  "time":"Время",
+  "duration_minutes":"Длительность (мин)",
+  "save":"Сохранить",
+  "cancel":"Отмена",
+  "confirm_delete_task":"Удалить задачу?"
 }

@@ -22,6 +22,7 @@ export default function CalendarView({ tasks, onAdd, onUpdate, onDelete, moods }
   const { t } = useTranslation()
   const [current, setCurrent] = useState<Date>(new Date())
   const [selected, setSelected] = useState<Date>(new Date())
+  const [reportOpen, setReportOpen] = useState<boolean>(false)
   const [mode, setMode] = useState<'month' | 'week'>('month')
   const [showPast, setShowPast] = useState<boolean>(true)
   const [showMoods, setShowMoods] = useState<boolean>(true)
@@ -102,13 +103,13 @@ export default function CalendarView({ tasks, onAdd, onUpdate, onDelete, moods }
       <div className="grid grid-cols-7 gap-2">
         {filteredWeeks.map((week, wi) => (
           <React.Fragment key={wi}>
-            {week.map((day) => {
+                {week.map((day) => {
               const inMonth = isSameMonth(day, current)
               const isSel = isSameDay(day, selected)
               const dayTasks = tasksForDate(day)
               const showDay = showPast ? true : (day >= startOfWeek(new Date()))
               return (
-                <motion.div key={day.toISOString()} onClick={() => setSelected(day)} whileHover={reduced ? undefined : { y: -4 }} whileTap={reduced ? undefined : { scale: 0.98 }} transition={reduced ? undefined : { type: 'spring', stiffness: 300, damping: 26 }} className={`relative p-3 rounded-lg cursor-pointer ${inMonth ? 'glass-task' : 'opacity-40'} ${isSel ? 'ring-2 ring-offset-2 ring-indigo-400' : ''}`} aria-label={`Day ${format(day,'d')}`}>
+                <motion.div key={day.toISOString()} onClick={() => { setSelected(day); setReportOpen(true) }} whileHover={reduced ? undefined : { y: -4 }} whileTap={reduced ? undefined : { scale: 0.98 }} transition={reduced ? undefined : { type: 'spring', stiffness: 300, damping: 26 }} className={`relative p-3 rounded-lg cursor-pointer ${inMonth ? 'glass-task' : 'opacity-40'} ${isSel ? 'ring-2 ring-offset-2 ring-indigo-400' : ''}`} aria-label={`Day ${format(day,'d')}`}>
                   <div className={`w-full h-8 flex items-center justify-center ${isSel ? 'font-semibold' : ''}`}>{format(day,'d')}</div>
                   <div className="mt-2 space-y-1">
                     {dayTasks.slice(0,2).map(t => (
@@ -130,38 +131,86 @@ export default function CalendarView({ tasks, onAdd, onUpdate, onDelete, moods }
         ))}
       </div>
 
-      <div className="mt-4">
-        <div className="flex items-center justify-between mb-2">
-          <div className="text-sm font-medium">Tasks for {format(selected,'PPP')}</div>
-            <div className="text-xs text-gray-500">{tasksForDate(selected).length} tasks</div>
-        </div>
+      {/* Modal: day mini-report */}
+      {reportOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setReportOpen(false)} />
+          <motion.div initial={{ scale: 0.98, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 300, damping: 24 }} className="z-10 w-11/12 max-w-2xl card-glass p-4">
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="text-lg font-semibold">{t('mini_report')} — {format(selected,'PPP')}</div>
+                <div className="text-sm text-gray-400">{tasksForDate(selected).length} {t('tasks_planned')}</div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="text-sm text-gray-500">{moods && moods[format(selected,'yyyy-MM-dd')] ? moods[format(selected,'yyyy-MM-dd')]?.emoji : '—'}</div>
+                <button onClick={() => setReportOpen(false)} className="px-3 py-1 btn-glass">{t('close')}</button>
+              </div>
+            </div>
 
-        <div className="bg-white p-3 rounded-xl card-glass">
-          {/* mood summary for selected day */}
-          {moods && moods[format(selected,'yyyy-MM-dd')] && (
-            <div className="mb-3 p-2 rounded-md bg-white/5">
-              <div className="flex items-center gap-3">
-                <div className="text-2xl">{moods[format(selected,'yyyy-MM-dd')].emoji}</div>
-                <div className="text-sm">
-                  {moods[format(selected,'yyyy-MM-dd')].note && <div className="text-xs text-gray-400">{moods[format(selected,'yyyy-MM-dd')].note}</div>}
-                  {moods[format(selected,'yyyy-MM-dd')].intensity && <div className="text-xs text-gray-400">Intensity: {moods[format(selected,'yyyy-MM-dd')].intensity}/5</div>}
+            <div className="mt-4 grid grid-cols-2 gap-4">
+              <div>
+                <div className="text-sm font-medium mb-2">{t('planned')}</div>
+                <div className="space-y-2 max-h-48 overflow-auto">
+                  {tasksForDate(selected).length === 0 ? <div className="text-sm text-gray-500">{t('no_planned_tasks')}</div> : tasksForDate(selected).map(t => (
+                    <div key={t.id} className="flex items-center justify-between p-2 rounded glass-task">
+                      <div className="text-sm"><strong>{t.time ? `${t.time} ` : ''}</strong>{t.title}</div>
+                      <div className="text-sm">{t.priority}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <div className="text-sm font-medium mb-2">{t('completed')}</div>
+                <div className="space-y-2 max-h-48 overflow-auto">
+                  {tasksForDate(selected).filter(t => t.completed).length === 0 ? <div className="text-sm text-gray-500">{t('no_completed_tasks')}</div> : tasksForDate(selected).filter(t => t.completed).map(t => (
+                    <div key={t.id} className="flex items-center justify-between p-2 rounded glass-task">
+                      <div className="text-sm">{t.time ? `${t.time} ` : ''}{t.title}</div>
+                      <div className="text-sm">✓</div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
-          )}
-          <AddTaskForm onAdd={(title, time, priority) => onAdd(title, time, priority, format(selected,'yyyy-MM-dd'))} onQuickAdd={() => {}} />
 
-          <div className="mt-3 space-y-2 max-h-[40vh] overflow-auto">
-            {tasksForDate(selected).length === 0 ? (
-              <div className="text-sm text-gray-500 p-6 text-center">No tasks for this day</div>
-            ) : (
-              tasksForDate(selected).map(t => (
-                <TaskItem key={t.id} task={t} onToggle={() => onUpdate(t.id,{completed: !t.completed})} onDelete={() => onDelete(t.id)} onEdit={(patch) => onUpdate(t.id,patch)} />
-              ))
-            )}
-          </div>
+            <div className="mt-4 flex items-center justify-between">
+              <div>
+                <div className="text-sm text-gray-500">{t('time_spent')}</div>
+                <div className="text-lg font-medium">
+                  {(() => {
+                    const total = tasksForDate(selected).reduce((s, t) => s + (t.timeSpentMinutes ?? 0), 0)
+                    const h = Math.floor(total / 60)
+                    const m = total % 60
+                    return total > 0 ? `${h > 0 ? `${h}h ` : ''}${m}m` : '—'
+                  })()}
+                </div>
+              </div>
+
+              <div>
+                <div className="text-sm text-gray-500">{t('completion')}</div>
+                <div className="text-lg font-medium">
+                  {(() => {
+                    const all = tasksForDate(selected).length
+                    const done = tasksForDate(selected).filter(t => t.completed).length
+                    return all === 0 ? '—' : `${Math.round((done / all) * 100)}%`
+                  })()}
+                </div>
+                <div className="w-full bg-white/6 rounded h-2 mt-2 overflow-hidden">
+                  <motion.div className="h-2 bg-gradient-to-r from-green-400 to-blue-400" initial={{ width: 0 }} animate={{ width: `${(() => {
+                    const all = tasksForDate(selected).length
+                    const done = tasksForDate(selected).filter(t => t.completed).length
+                    return all === 0 ? 0 : Math.round((done / all) * 100)
+                  })()}%` }} transition={{ type: 'spring', stiffness: 260, damping: 24 }} />
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <AddTaskForm onAdd={(title, time, priority) => onAdd(title, time, priority, format(selected,'yyyy-MM-dd'))} onQuickAdd={() => {}} />
+            </div>
+          </motion.div>
         </div>
-      </div>
+      )}
       <EditTaskModal open={!!editing} task={editing} onClose={() => setEditing(null)} onSave={(id,patch) => { onUpdate(id,patch); setEditing(null) }} onDelete={(id) => { onDelete(id); setEditing(null) }} />
     </div>
   )

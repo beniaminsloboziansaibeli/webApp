@@ -30,8 +30,30 @@
   "today": "Today",
   "calendar": "Calendar",
   "agenda": "Agenda",
-  "weekly_mood": "Weekly mood"
-  ,"theme": "Theme",
+  "weekly_mood": "Weekly mood",
+  "theme": "Theme",
   "dark": "Dark",
-  "light": "Light"
+  "light": "Light",
+  "mini_report": "Mini report",
+  "tasks_planned": "tasks planned",
+  "planned": "Planned",
+  "completed": "Completed",
+  "time_spent": "Time spent",
+  "completion": "Completion",
+  "no_planned_tasks": "No planned tasks",
+  "no_completed_tasks": "No completed tasks",
+  "close": "Close",
+  "week_of": "Week of",
+  "tasks_count": "tasks",
+  "no_tasks_short": "No tasks",
+  "expand": "Open"
+  ,"expand_all": "Expand all",
+  "collapse_all": "Collapse all"
+  ,"edit_task":"Edit Task",
+  "time":"Time",
+  "duration_minutes":"Duration (min)",
+  "save":"Save",
+  "cancel":"Cancel",
+  "confirm_delete_task":"Delete task?"
 }
+ 

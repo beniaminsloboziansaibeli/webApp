@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { format, startOfWeek, addDays, addWeeks, subWeeks, isSameDay } from 'date-fns'
 import { motion } from 'framer-motion'
+import { Check, ArrowRight, Clock } from 'lucide-react'
 import { cardEnter } from '../lib/motion'
 import useReducedMotion from '../lib/useReducedMotion'
 import { Task } from '../types'
@@ -46,36 +47,79 @@ export default function AgendaView({ tasks, onUpdate, onDelete, moods }: AgendaV
 
   const reduced = useReducedMotion()
 
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({})
+
   return (
     <div className="mt-4">
       <WeeklyMood moods={moods} />
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
           <button onClick={() => setCurrent(subWeeks(current,1))} className="p-2 rounded btn-glass">‹</button>
-          <div className="text-lg font-semibold">Week of {format(start, 'PPP')}</div>
+          <div className="text-lg font-semibold">{t('week_of')} {format(start, 'PPP')}</div>
           <button onClick={() => setCurrent(addWeeks(current,1))} className="p-2 rounded btn-glass">›</button>
         </div>
         <div>
-          <button onClick={() => setCurrent(new Date())} className="px-3 py-1 rounded btn-primary text-white">Today</button>
+          <button onClick={() => setCurrent(new Date())} className="px-3 py-1 rounded btn-primary text-white">{t('today')}</button>
         </div>
       </div>
 
-      <div className="grid grid-cols-7 gap-2">
-        {days.map(day => (
-          <motion.div key={day.toISOString()} className="p-3 rounded-lg glass-task min-h-[120px]" onDragOver={onDragOver} onDrop={(e) => onDropTo(e, day)} aria-label={`Column for ${format(day,'EEEE')}`} whileTap={reduced ? undefined : { scale: 0.995 }}>
-            <div className="text-xs text-gray-500 mb-2 flex items-center justify-between">
-              <div>{format(day,'EEE d')}</div>
-              <div className="text-lg">{moods?.[format(day,'yyyy-MM-dd')]?.emoji}</div>
-            </div>
-            <div className="space-y-2">
-              {tasksFor(day).length === 0 ? <div className="text-sm text-gray-400">{t('noTasks')}</div> : tasksFor(day).map(t => (
-                <div key={t.id} draggable onDragStart={(e) => onDragStart(e,t.id)}>
-                  <TaskItem task={t} onToggle={() => onUpdate(t.id,{completed: !t.completed})} onDelete={() => onDelete(t.id)} onEdit={(patch) => onUpdate(t.id,patch)} />
+      <div className="flex items-center justify-between mb-2">
+        <div />
+        <div className="flex items-center gap-2">
+          <button onClick={() => {
+            const next: Record<string, boolean> = {}
+            days.forEach(d => { next[format(d,'yyyy-MM-dd')] = true })
+            setExpanded(next)
+          }} className="px-3 py-1 rounded btn-glass">{t('expand_all')}</button>
+          <button onClick={() => setExpanded({})} className="px-3 py-1 rounded btn-glass">{t('collapse_all')}</button>
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        {days.map(day => {
+          const key = format(day,'yyyy-MM-dd')
+          const dayTasks = tasksFor(day)
+          const isExpanded = !!expanded[key]
+          return (
+            <motion.div key={key} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', stiffness: 300, damping: 24 }} className="p-3 rounded-lg glass-task">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="text-sm font-medium">{format(day,'EEEE, MMM d')}</div>
+                  <div className="text-lg">{moods?.[key]?.emoji}</div>
                 </div>
-              ))}
-            </div>
-          </motion.div>
-        ))}
+                <div className="text-sm text-gray-500">{dayTasks.length > 0 ? `${dayTasks.length} ${t('tasks_count')}` : t('no_tasks_short')}</div>
+              </div>
+
+              <div className="mt-3">
+                <button onClick={() => setExpanded(prev => ({ ...prev, [key]: !prev[key] }))} className="w-full text-left p-3 rounded btn-glass">
+                  {!isExpanded ? (
+                    <div className="flex items-center justify-between">
+                      <div className="text-sm text-gray-600">{dayTasks.length > 0 ? dayTasks.slice(0,2).map(t => <span key={t.id} className="mr-2">{t.time ? `${t.time} ` : ''}{t.title}</span>) : <span className="text-gray-400">{t('noTasks')}</span>}</div>
+                      <div className="text-xs text-gray-500">{t('expand')}</div>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {dayTasks.length === 0 ? <div className="text-sm text-gray-400">{t('noTasks')}</div> : dayTasks.map(task => (
+                            <div key={task.id} className="flex items-center justify-between p-2 rounded glass-soft">
+                              <div className="text-sm flex items-center gap-2">
+                                {task.time ? <span className="text-xs text-gray-400">{task.time}</span> : null}
+                                <span>{task.title}</span>
+                                {typeof task.timeSpentMinutes === 'number' && (
+                                  <span className="ml-2 px-2 py-0.5 rounded text-[11px] bg-white/6 text-sm flex items-center gap-1"><Clock size={12} /> {task.timeSpentMinutes}m</span>
+                                )}
+                              </div>
+                              <div className="text-sm">
+                                {task.completed ? <Check size={16} className="text-green-400" /> : <ArrowRight size={16} className="text-gray-400" />}
+                              </div>
+                            </div>
+                      ))}
+                    </div>
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          )
+        })}
       </div>
     </div>
   )

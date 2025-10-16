@@ -34,4 +34,25 @@
   ,"theme": "Temă",
   "dark": "Întunecat",
   "light": "Deschis"
+  ,"mini_report": "Mini raport",
+  "tasks_planned": "sarcini planificate",
+  "planned": "Planificate",
+  "completed": "Finalizate",
+  "time_spent": "Timp petrecut",
+  "completion": "Finalizare",
+  "no_planned_tasks": "Nici o sarcină planificată",
+  "no_completed_tasks": "Nici o sarcină finalizată"
+  ,"close": "Închide",
+  "week_of": "Săptămâna din",
+  "tasks_count": "sarcini",
+  "no_tasks_short": "Fără sarcini",
+  "expand": "Deschide"
+  ,"expand_all": "Extinde tot",
+  "collapse_all": "Restrânge tot"
+  ,"edit_task":"Editează sarcină",
+  "time":"Timp",
+  "duration_minutes":"Durată (min)",
+  "save":"Salvează",
+  "cancel":"Anulează",
+  "confirm_delete_task":"Ștergi sarcina?"
 }
