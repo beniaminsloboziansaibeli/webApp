@@ -26,6 +26,7 @@ import i18n from 'i18next'
 import FAB from './components/FAB'
 import BottomNav from './components/BottomNav'
 import QuickAddModal from './components/QuickAddModal'
+import Analytics from './components/Analytics'
 
 const App: React.FC = () => {
   const { t } = useTranslation()
@@ -49,7 +50,7 @@ const App: React.FC = () => {
     } catch { return 0 }
   }) // util func
   const [settings, setSettings] = useState<SettingsType>(() => loadSettings())
-  const [view, setView] = useState<'today' | 'calendar' | 'agenda'>('today')
+  const [view, setView] = useState<'home' | 'tasks' | 'calendar' | 'analytics'>('home')
 
   const toggleTheme = () => {
     try {
@@ -214,17 +215,44 @@ const App: React.FC = () => {
       <main className="mt-4">
   <div className="card-glass shadow-md rounded-xl p-4">
           <div className="flex items-center gap-2 mb-3">
-            <button onClick={() => setView('today')} className={`px-3 py-1 rounded ${view === 'today' ? 'btn-primary text-white' : 'btn-glass'}`}>Today</button>
+            <button onClick={() => setView('tasks')} className={`px-3 py-1 rounded ${view === 'tasks' ? 'btn-primary text-white' : 'btn-glass'}`}>Tasks</button>
             <button onClick={() => setView('calendar')} className={`px-3 py-1 rounded ${view === 'calendar' ? 'btn-primary text-white' : 'btn-glass'}`}>Calendar</button>
-            <button onClick={() => setView('agenda')} className={`px-3 py-1 rounded ${view === 'agenda' ? 'btn-primary text-white' : 'btn-glass'}`}>Agenda</button>
+            <button onClick={() => setView('analytics')} className={`px-3 py-1 rounded ${view === 'analytics' ? 'btn-primary text-white' : 'btn-glass'}`}>Analytics</button>
           </div>
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">{t('tasksDone', { done: doneCount, total: tasks.length })}</h2>
-            <div className="text-sm text-gray-500">Streak: <strong>Day 1</strong></div>
-          </div>
-          <ProgressBar value={tasks.length ? (doneCount / tasks.length) * 100 : 0} />
-
-          {view === 'today' ? (
+          {view === 'home' ? (
+            <>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="card-glass p-4 rounded-xl">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-muted">{t('today')}</div>
+                    <div className="text-sm text-muted">{t('today')}</div>
+                  </div>
+                  <div className="text-3xl font-bold mt-3">{doneCount}</div>
+                  <div className="text-sm text-muted">{t('tasks_planned')}</div>
+                </div>
+                <div className="card-glass p-4 rounded-xl">
+                  <div className="text-sm text-muted">{t('remaining')}</div>
+                  <div className="text-3xl font-bold mt-3">{Math.max(0, tasks.length - doneCount)}</div>
+                  <div className="text-sm text-muted">{t('to_complete')}</div>
+                </div>
+              </div>
+              <div className="mt-4 card-glass p-4 rounded-xl">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="text-lg font-semibold">{t('dailyProgress')}</div>
+                  <div className="text-sm text-muted">{Math.round(tasks.length ? (doneCount / tasks.length) * 100 : 0)}%</div>
+                </div>
+                <ProgressBar value={tasks.length ? (doneCount / tasks.length) * 100 : 0} />
+                <div className="flex justify-between text-sm text-muted mt-2">
+                  <div>{doneCount} din {tasks.length} sarcini</div>
+                  <div>+2 față de ieri</div>
+                </div>
+              </div>
+              <div className="mt-4 flex items-center justify-between">
+                <h3 className="text-lg font-semibold">{t('upcomingTasks')}</h3>
+                <a className="text-sm text-blue-400">{t('viewAll')}</a>
+              </div>
+            </>
+          ) : view === 'tasks' ? (
             <>
               <div className="mt-4">
                 <AddTaskForm onAdd={(title: string, time?: string, priority?: Task['priority']) => addTask(title, time, priority)} onQuickAdd={(text: string) => quickAdd(text)} />
@@ -247,10 +275,10 @@ const App: React.FC = () => {
             </>
           ) : view === 'calendar' ? (
             <CalendarView tasks={tasks} onAdd={addTask} onUpdate={updateTask} onDelete={deleteTask} moods={moods} />
-          ) : (
-            <AgendaView tasks={tasks} onUpdate={updateTask} onDelete={deleteTask} moods={moods} />
-          )}
-        </div>
+          ) : view === 'analytics' ? (
+            <Analytics tasksDone={doneCount} total={tasks.length} />
+          ) : null}
+  </div>
 
         <div className="mt-4">
           <Goals goals={goals} setGoals={setGoals} />

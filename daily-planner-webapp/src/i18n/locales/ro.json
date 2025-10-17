@@ -55,4 +55,15 @@
   "save":"Salvează",
   "cancel":"Anulează",
   "confirm_delete_task":"Ștergi sarcina?"
+  ,"tasks":"Sarcini"
+  ,"analytics":"Analitică"
+  ,"completionRate":"Rată de finalizare"
+  ,"recentTrends":"Tendințe recente"
+  ,"chartPlaceholder":"Loc pentru grafic"
+  ,"home":"Acasă"
+  ,"viewAll":"Vezi toate"
+  ,"upcomingTasks":"Următoarele sarcini"
+  ,"remaining":"Rămase"
+  ,"to_complete":"De finalizat"
+  ,"dailyProgress":"Progres zilnic"
 }

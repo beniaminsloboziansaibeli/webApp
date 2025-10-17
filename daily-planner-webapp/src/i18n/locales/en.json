@@ -55,5 +55,16 @@
   "save":"Save",
   "cancel":"Cancel",
   "confirm_delete_task":"Delete task?"
+  ,"tasks":"Tasks"
+  ,"analytics":"Analytics"
+  ,"completionRate":"Completion rate"
+  ,"recentTrends":"Recent trends"
+  ,"chartPlaceholder":"Chart placeholder"
+  ,"home":"Home"
+  ,"viewAll":"View all"
+  ,"upcomingTasks":"Upcoming tasks"
+  ,"remaining":"Remaining"
+  ,"to_complete":"To complete"
+  ,"dailyProgress":"Daily progress"
 }
  
